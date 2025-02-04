@@ -45,6 +45,7 @@ function printClosingTagEnd(node, options) {
   )
     ? ""
     : [
+        node.isSelfClosing && node.attrs.length > 1 && node.type === "element" ? line : "",
         printClosingTagEndMarker(node, options),
         printClosingTagSuffix(node, options),
       ];
@@ -236,9 +237,17 @@ function printAttributes(path, options, print) {
       ? (attribute) => ignoreAttributeData.includes(attribute.rawName)
       : () => false;
 
+    const isMultilineDirective = (attribute) => {
+        if (attribute.name.startsWith(":") && attribute.value.includes("\n")) {
+            return true;
+        }
+    
+        return false
+    }
+
   const printedAttributes = path.map((attributePath) => {
     const attribute = attributePath.getValue();
-    return hasPrettierIgnoreAttribute(attribute)
+    return hasPrettierIgnoreAttribute(attribute) || isMultilineDirective(attribute)
       ? replaceTextEndOfLine(
           options.originalText.slice(locStart(attribute), locEnd(attribute))
         )
@@ -246,11 +255,11 @@ function printAttributes(path, options, print) {
   }, "attrs");
 
   const forceNotToBreakAttrContent =
-    node.type === "element" &&
+    (node.type === "element" &&
     node.fullName === "script" &&
     node.attrs.length === 1 &&
     node.attrs[0].fullName === "src" &&
-    node.children.length === 0;
+    node.children.length === 0) || node.attrs.length === 1;
 
   const shouldPrintAttributePerLine =
     options.singleAttributePerLine &&
@@ -315,6 +324,7 @@ function printOpeningTag(path, options, print) {
     printOpeningTagStart(node, options),
     printAttributes(path, options, print),
     node.isSelfClosing ? "" : printOpeningTagEnd(node),
+    !node.isSelfClosing && node.attrs.length > 1 ? line : "",
   ];
 }
 

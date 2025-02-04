@@ -11,6 +11,7 @@ const {
   isTextLikeNode,
   hasPrettierIgnore,
   preferHardlineAsLeadingSpaces,
+  isVueScriptTag,
 } = require("../utils/index.js");
 const {
   printOpeningTagPrefix,
@@ -25,7 +26,7 @@ const {
 function printChild(childPath, options, print) {
   const child = childPath.getValue();
 
-  if (hasPrettierIgnore(child)) {
+  if (hasPrettierIgnore(child) || isVueScriptTag(child, options)) {
     return [
       printOpeningTagPrefix(child, options),
       ...replaceTextEndOfLine(
@@ -187,7 +188,9 @@ function printChildren(path, options, print) {
         }
       } else if (nextBetweenLine === hardline) {
         if (isTextLikeNode(childNode.next)) {
-          nextParts.push(hardline);
+          nextParts.push(hardline, hardline);
+        } else {
+            nextParts.push(hardline);
         }
       } else {
         trailingParts.push(nextBetweenLine);
