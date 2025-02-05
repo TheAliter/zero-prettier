@@ -1,6 +1,6 @@
 {
   "name": "zero-prettier",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Adjusted Prettier code formatter",
   "bin": "./bin/prettier.js",
   "repository": {

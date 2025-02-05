@@ -1,109 +1,89 @@
-![Prettier Banner](https://unpkg.com/prettier-logo@1.0.3/images/prettier-banner-light.svg)
 
-<h2 align="center">Opinionated Code Formatter</h2>
+## Adjusted Prettier Opinionated Code Formatter
 
-<p align="center">
-  <em>
-    JavaScript
-    · TypeScript
-    · Flow
-    · JSX
-    · JSON
-  </em>
-  <br />
-  <em>
-    CSS
-    · SCSS
-    · Less
-  </em>
-  <br />
-  <em>
-    HTML
-    · Vue
-    · Angular
-  </em>
-  <br />
-  <em>
-    GraphQL
-    · Markdown
-    · YAML
-  </em>
-  <br />
-  <em>
-    <a href="https://prettier.io/docs/en/plugins.html">
-      Your favorite language?
-    </a>
-  </em>
-</p>
+See original prettier source code (v2.8.8) - https://github.com/prettier/prettier
 
-<p align="center">
-  <a href="https://github.com/prettier/prettier/actions?query=workflow%3AProd+branch%3Amain">
-    <img alt="Github Actions Build Status" src="https://img.shields.io/github/actions/workflow/status/prettier/prettier/prod-test.yml?label=Prod&style=flat-square"></a>
-  <a href="https://github.com/prettier/prettier/actions?query=workflow%3ADev+branch%3Amain">
-    <img alt="Github Actions Build Status" src="https://img.shields.io/github/actions/workflow/status/prettier/prettier/dev-test.yml?label=Dev&style=flat-square"></a>
-  <a href="https://github.com/prettier/prettier/actions?query=workflow%3ALint+branch%3Amain">
-    <img alt="Github Actions Build Status" src="https://img.shields.io/github/actions/workflow/status/prettier/prettier/lint.yml?label=Lint&style=flat-square"></a>
-  <a href="https://codecov.io/gh/prettier/prettier">
-    <img alt="Codecov Coverage Status" src="https://img.shields.io/codecov/c/github/prettier/prettier.svg?style=flat-square"></a>
-  <a href="https://twitter.com/acdlite/status/974390255393505280">
-    <img alt="Blazing Fast" src="https://img.shields.io/badge/speed-blazing%20%F0%9F%94%A5-brightgreen.svg?style=flat-square"></a>
-  <br/>
-  <a href="https://www.npmjs.com/package/prettier">
-    <img alt="npm version" src="https://img.shields.io/npm/v/prettier.svg?style=flat-square"></a>
-  <a href="https://www.npmjs.com/package/prettier">
-    <img alt="weekly downloads from npm" src="https://img.shields.io/npm/dw/prettier.svg?style=flat-square"></a>
-  <a href="#badge">
-    <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square"></a>
-  <a href="https://twitter.com/PrettierCode">
-    <img alt="Follow Prettier on Twitter" src="https://img.shields.io/twitter/follow/prettiercode.svg?label=follow+prettier&style=flat-square"></a>
-</p>
+> ---
+> ### This package provides only formatting for Vue files template section! 
+> ---
 
-## Intro
+#### PRETTIER CONFIG
 
-Prettier is an opinionated code formatter. It enforces a consistent style by parsing your code and re-printing it with its own rules that take the maximum line length into account, wrapping code when necessary.
+This package expects specific configuration to work as intended (if different config is used, the results are unknown). Put following configuration into `.prettierrc` file in the root of your project:
 
-### Input
-
-<!-- prettier-ignore -->
-```js
-foo(reallyLongArg(), omgSoManyParameters(), IShouldRefactorThis(), isThereSeriouslyAnotherOne());
+```json
+{
+    "tabWidth": 4,
+    "printWidth": 120,
+    "semi": false,
+    "singleQuote": true,
+    "quoteProps": "consistent",
+    "bracketSameLine": true,
+    "htmlWhitespaceSensitivity": "ignore",
+    "vueIndentScriptAndStyle": true,
+    "singleAttributePerLine": true
+}
 ```
 
-### Output
+#### HOW TO FORMAT A FILE
 
-```js
-foo(
-  reallyLongArg(),
-  omgSoManyParameters(),
-  IShouldRefactorThis(),
-  isThereSeriouslyAnotherOne()
-);
+Run formatter from CLI with following command:
+
+```sh
+npx zero-prettier --parser vue --write [pathToFile]
 ```
 
-Prettier can be run [in your editor](https://prettier.io/docs/en/editors.html) on-save, in a [pre-commit hook](https://prettier.io/docs/en/precommit.html), or in [CI environments](https://prettier.io/docs/en/cli.html#list-different) to ensure your codebase has a consistent style without devs ever having to post a nit-picky comment on a code review ever again!
+#### INSTALLATION
 
----
+You can install package as dev dependency for your project with following command:
 
-**[Documentation](https://prettier.io/docs/en/)**
-
-<!-- prettier-ignore -->
-[Install](https://prettier.io/docs/en/install.html) ·
-[Options](https://prettier.io/docs/en/options.html) ·
-[CLI](https://prettier.io/docs/en/cli.html) ·
-[API](https://prettier.io/docs/en/api.html)
-
-**[Playground](https://prettier.io/playground/)**
-
----
-
-## Badge
-
-Show the world you're using _Prettier_ → [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-
-```md
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+```sh
+npm install -D zero-prettier
 ```
 
-## Contributing
+#### GIT POST-COMMIT HOOK
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+If you feel confident in formatter, you can use it in git post-commit hook to automatically format only changed Vue files in the last commit. If some vue files will be formatted, then this script will create new commit for it. Create file `.git/hooks/post-commit` with following content:
+
+```sh
+#!/bin/bash
+
+# Get the list of .vue files changed in the last commit
+LAST_COMMIT_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep ".vue$")
+
+# Check if there are any Vue files in the last commit
+if [[ -z "$LAST_COMMIT_FILES" ]]; then
+    echo "No Vue files were changed in the last commit. Skipping 'zero-prettier' formatting."
+    exit 0
+fi
+
+echo "Formatting last commit's Vue files with 'zero-prettier'..."
+echo "$LAST_COMMIT_FILES"
+
+# Run `zero-prettier` on each changed Vue file
+for file in $LAST_COMMIT_FILES; do
+    # Perform formatting twice because attributes are formatted after children, thus children might not have empty line before parent opening tag end
+    for i in {1..2}; do
+        npx zero-prettier --parser vue --write --ignore-unknown "$file"
+
+        if [[ $? -ne 0 ]]; then
+            echo "'zero-prettier' failed to format $file. Aborting commit."
+            exit 1
+        fi
+    done
+done
+
+# Check if `zero-prettier` made changes
+git diff --quiet --exit-code $LAST_COMMIT_FILES
+if [[ $? -eq 0 ]]; then
+    echo "No formatting changes detected. Skipping creating new commit with formatted files."
+    exit 0
+fi
+
+# Stage and commit formatted files
+git add $LAST_COMMIT_FILES
+git commit -m "(hook) FORMATTING: formatted last commit's Vue files with 'zero-prettier' code formatter"
+
+echo "'zero-prettier' formatting applied and committed!"
+exit 0
+```
